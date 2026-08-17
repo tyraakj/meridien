@@ -1,0 +1,95 @@
+name: CI & Quality Checks
+
+on:
+  push:
+    branches: ["main", "dev"]
+  pull_request:
+    branches: ["main", "dev"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-formatting:
+    name: Code Formatting & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install Root Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Check Code Formatting (Prettier)
+        run: pnpm run format:check
+
+  smart-contracts:
+    name: Smart Contracts Build & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile=false
+          pnpm approve-builds keccak secp256k1 || true
+
+      - name: Compile Solidity Smart Contracts
+        working-directory: frontend
+        run: pnpm run compile:contracts
+
+      - name: Run Hardhat Test Suite
+        working-directory: frontend
+        run: pnpm run test:contracts
+
+  backend-tests:
+    name: Backend GIS & Pytest Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: uv sync
+
+      - name: Run Pytest Test Suite
+        working-directory: backend
+        run: uv run pytest tests/ -v
