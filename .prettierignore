@@ -1,0 +1,12 @@
+node_modules/
+.next/
+dist/
+build/
+artifacts/
+cache/
+typechain-types/
+coverage/
+*.lock
+pnpm-lock.yaml
+.venv/
+__pycache__/

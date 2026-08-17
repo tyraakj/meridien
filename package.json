@@ -1,0 +1,31 @@
+{
+  "name": "meridien",
+  "version": "1.0.0",
+  "description": "Meridien - Blockchain-Based Blue Carbon Registry and MRV System",
+  "private": true,
+  "author": "tyraakj",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,sol,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,sol,md}\"",
+    "lint": "eslint . --ext .ts,.tsx,.js"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.20.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.1",
+    "prettier-plugin-solidity": "^1.4.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md}": [
+      "prettier --write"
+    ],
+    "*.sol": [
+      "prettier --write"
+    ]
+  }
+}
