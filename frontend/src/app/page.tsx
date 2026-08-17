@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { retireCreditsOnChain } from "@/lib/viem";
+import { MapViewer } from "@/components/MapViewer";
 
 export default function PublicRegistryPage() {
   const [stats, setStats] = useState({
@@ -182,6 +183,9 @@ export default function PublicRegistryPage() {
           </div>
         </div>
 
+        {/* Interactive GIS Spatial Map Component */}
+        <MapViewer />
+
         {/* Public Plots Registry Table */}
         <div className="bg-ocean-900/90 border border-ocean-700/60 rounded-xl shadow-xl backdrop-blur-md overflow-hidden">
           <div className="p-5 border-b border-ocean-800 flex items-center justify-between">
@@ -328,15 +332,23 @@ export default function PublicRegistryPage() {
                   <div className="p-2.5 bg-ocean-950 rounded-lg text-[10px] font-mono text-ocean-400 break-all border border-ocean-800">
                     Tx: {retireTxHash}
                   </div>
-                  <button
-                    onClick={() => {
-                      setRetireModalOpen(false);
-                      setRetireTxHash(null);
-                    }}
-                    className="w-full py-2 rounded-lg bg-ocean-800 hover:bg-ocean-700 text-white text-xs font-semibold"
-                  >
-                    Done
-                  </button>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/certificates/cert-retire-${Date.now()}`}
+                      className="flex-1 py-2 rounded-lg bg-mangrove-500 hover:bg-mangrove-600 text-white text-xs font-bold text-center"
+                    >
+                      View Certificate
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setRetireModalOpen(false);
+                        setRetireTxHash(null);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-ocean-800 hover:bg-ocean-700 text-white text-xs font-semibold"
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
