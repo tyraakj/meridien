@@ -1,0 +1,17 @@
+# Global repository code owner
+* @tyraakj
+
+# Blockchain & Smart Contracts
+/frontend/contracts/ @tyraakj
+/frontend/test/ @tyraakj
+/frontend/scripts/ @tyraakj
+
+# Backend GIS & Ingestion Engine
+/backend/ @tyraakj
+
+# Frontend Application
+/frontend/src/ @tyraakj
+
+# CI & DevOps Infrastructure
+/.github/ @tyraakj
+/docker-compose.yml @tyraakj
