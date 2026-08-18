@@ -39,6 +39,7 @@ export function Navbar() {
     { href: "/", label: "Public Registry", icon: Globe },
     { href: "/capture", label: "Field Capture (PWA)", icon: MapPin },
     { href: "/verifier", label: "Verifier Portal", icon: ShieldCheck },
+    { href: "/capture-field", label: "Capture Fields (MAP)", icon: MapPin}
   ];
 
   return (
