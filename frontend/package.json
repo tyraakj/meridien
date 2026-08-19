@@ -10,8 +10,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "compile:contracts": "hardhat compile",
-    "test:contracts": "hardhat test"
+    "test:contracts": "hardhat test",
+    "test:e2e": "hardhat run scripts/e2e-simulation.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.66.0",

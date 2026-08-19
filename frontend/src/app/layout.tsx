@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { Navbar } from "@/components/Navbar";
@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description:
     "Offline-first blue carbon MRV platform and blockchain settlement registry for coastal mangrove ecosystems.",
   manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
   themeColor: "#008DDA",
 };
 

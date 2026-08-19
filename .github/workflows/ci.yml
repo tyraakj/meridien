@@ -1,18 +1,78 @@
-name: CI & Quality Checks
+name: CI
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches:
+      - main
+      - dev
   pull_request:
-    branches: ["main", "dev"]
+    branches:
+      - main
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  code-formatting:
-    name: Code Formatting & Linting
+  branch-name:
+    name: Branch name check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch naming convention
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if [ "$BRANCH" = "dev" ] && [ "${{ github.base_ref }}" = "main" ]; then
+            echo "✅ PR from 'dev' to 'main' is permitted."
+            exit 0
+          fi
+          PATTERN="^(feat|fix|chore|docs|refactor|ci|test|hotfix|release)/.+"
+          if [[ "$BRANCH" =~ $PATTERN ]]; then
+            echo "✅ Branch name '$BRANCH' follows naming conventions."
+          else
+            echo "❌ Branch name '$BRANCH' does not follow naming conventions."
+            echo ""
+            echo "Branch names must follow the pattern: <type>/<description>"
+            echo ""
+            echo "Allowed types:"
+            echo "  feat/     → new feature"
+            echo "  fix/      → bug fix"
+            echo "  chore/    → maintenance, tooling, config"
+            echo "  docs/     → documentation only"
+            echo "  refactor/ → code change with no feature/fix"
+            echo "  ci/       → CI/CD changes"
+            echo "  test/     → adding or updating tests"
+            echo "  hotfix/   → urgent production fix"
+            echo "  release/  → release preparation"
+            echo ""
+            echo "Examples: feat/add-remove-owner, fix/cli-key-exposure, docs/update-readme"
+            exit 1
+          fi
+
+  guard-main:
+    name: Only dev can target main
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject non-dev source branches
+        run: |
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "❌ PRs to main must come from the dev branch."
+            echo "   Source branch detected: ${{ github.head_ref }}"
+            echo "   Please retarget your PR to the dev branch."
+            exit 1
+          fi
+          echo "✅ Source branch is dev — OK to proceed."
+
+  lint-and-format:
+    name: Code Formatting & Prettier Check
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -37,6 +97,7 @@ jobs:
 
   smart-contracts:
     name: Smart Contracts Build & Tests
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -68,8 +129,51 @@ jobs:
         working-directory: frontend
         run: pnpm run test:contracts
 
+  frontend-build:
+    name: Next.js PWA Build, Type Check & E2E Simulation
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile=false
+          pnpm approve-builds keccak secp256k1 || true
+
+      - name: Compile Smart Contracts
+        working-directory: frontend
+        run: pnpm run compile:contracts
+
+      - name: TypeScript Type Check
+        working-directory: frontend
+        run: pnpm run typecheck
+
+      - name: Build Next.js PWA
+        working-directory: frontend
+        run: pnpm run build
+
+      - name: Run Protocol E2E Simulation Harness
+        working-directory: frontend
+        run: pnpm run test:e2e
+
   backend-tests:
     name: Backend GIS & Pytest Suite
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

@@ -1,5 +1,5 @@
 const CACHE_NAME = "meridien-pwa-cache-v1";
-const STATIC_ASSETS = ["/", "/manifest.json", "/capture", "/verifier", "/globals.css"];
+const STATIC_ASSETS = ["/", "/manifest.json", "/capture", "/verifier"];
 
 // Install event - cache core shell
 self.addEventListener("install", (event) => {
